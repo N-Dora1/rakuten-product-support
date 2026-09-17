@@ -2,6 +2,7 @@ import os
 import json
 import time
 import requests
+import csv
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -462,6 +463,36 @@ def create_x_post(item):
 
 
 # ==========================================
+def save_result_to_csv(item, post):
+    filename = "rakuten_results.csv"
+    file_exists = os.path.exists(filename)
+
+    with open(filename, "a", newline="", encoding="utf-8-sig") as f:
+        writer = csv.writer(f)
+
+        if not file_exists:
+            writer.writerow([
+                "日時",
+                "商品名",
+                "価格",
+                "レビュー評価",
+                "レビュー件数",
+                "検索ジャンル",
+                "X投稿文",
+                "アフィリエイトURL"
+            ])
+
+        writer.writerow([
+            time.strftime("%Y-%m-%d %H:%M:%S"),
+            item["name"],
+            item["price"],
+            item["review_average"],
+            item["review_count"],
+            item.get("keyword", ""),
+            post,
+            item["affiliate_url"]
+        ])
+
 # メイン処理
 # ==========================================
 
@@ -563,6 +594,7 @@ def main():
     print("\n第1位の商品でX投稿文を作成しています...\n")
 
     post = create_x_post(selected)
+    save_result_to_csv(selected, post)
 
     print("========================================")
     print("        X投稿用 完成文章")
